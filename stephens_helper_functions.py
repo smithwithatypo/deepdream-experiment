@@ -1,3 +1,19 @@
+import tensorflow as tf
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import stephens_helper_functions as hf
+
+
+import IPython.display as display
+import PIL.Image
+
+import os
+import pathlib
+import itertools
+import random
+
+
 
 """# Define functions to select random layers"""
 
@@ -111,7 +127,7 @@ def read_image_from_colab_storage(image, folder, route="train"):
     else:
         print("Please input route=\"train\" or \"test\" or \"val\" ")
 
-    test_image_path = tf.keras.utils.get_file(image, f"file:///Desktop/Work/Research\ Lab/deepdream_experiment/tiny-imagenet-200/{route}/{folder}/images/{image}")
+    test_image_path = tf.keras.utils.get_file(image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
     print(f"Look here for the file: {test_image_path}")
 
     img = PIL.Image.open(test_image_path)
