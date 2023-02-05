@@ -23,3 +23,11 @@ original_img = hf.read_image_from_colab_storage(input_file, folder=id)
 
 print(f"Original Image:")
 hf.show(original_img)
+
+
+
+def export_image():
+    # input image
+    # input file path?
+    # input file name? use image name?
+   pass 

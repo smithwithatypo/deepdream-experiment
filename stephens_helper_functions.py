@@ -15,6 +15,37 @@ import random
 
 
 
+
+"""# read files """
+
+def read_image_from_colab_storage(image, folder, route="train"):
+    ''' read an image from /root/.keras/datasets/tiny-imagenet-200 '''
+
+    if (route == "train" or
+        route == "test" or
+        route == "val"):
+        pass
+    else:
+        print("Please input route=\"train\" or \"test\" or \"val\" ")
+
+    test_image_path = tf.keras.utils.get_file(image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
+    print(f"Look here for the file: {test_image_path}")
+
+    img = PIL.Image.open(test_image_path)
+    final_img = np.array(img)
+
+    return final_img
+
+
+def make_filename(filename, number=0, extension="JPEG"):
+    ''' append number and file extension to a filename '''
+
+    result = f"{filename}_{number}.{extension}"
+    return result
+
+
+
+
 """# Define functions to select random layers"""
 
 
@@ -116,31 +147,6 @@ def run_deep_dream_simple(img, steps=100, step_size=0.01):
 
 
 
-
-def read_image_from_colab_storage(image, folder, route="train"):
-    ''' read an image from /root/.keras/datasets/tiny-imagenet-200 '''
-
-    if (route == "train" or
-        route == "test" or
-        route == "val"):
-        pass
-    else:
-        print("Please input route=\"train\" or \"test\" or \"val\" ")
-
-    test_image_path = tf.keras.utils.get_file(image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
-    print(f"Look here for the file: {test_image_path}")
-
-    img = PIL.Image.open(test_image_path)
-    final_img = np.array(img)
-
-    return final_img
-
-
-def make_filename(filename, number=0, extension="JPEG"):
-    ''' append number and file extension to a filename '''
-
-    result = f"{filename}_{number}.{extension}"
-    return result
 
 
 def create_layer_activated_model(base_model, layers):
