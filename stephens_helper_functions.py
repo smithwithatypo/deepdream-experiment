@@ -4,7 +4,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import stephens_helper_functions as hf
 
-
 import IPython.display as display
 import PIL.Image
 
@@ -14,57 +13,68 @@ import itertools
 import random
 
 
+class DeepDream(tf.Module):
+    def __init__(self, model):
+        self.model = model
+
+    @tf.function(
+        input_signature=(
+            tf.TensorSpec(shape=[None, None, 3], dtype=tf.float32),
+            tf.TensorSpec(shape=[], dtype=tf.int32),
+            tf.TensorSpec(shape=[], dtype=tf.float32),)
+    )
+    def __call__(self, img, steps, step_size):
+        print("Tracing")
+        loss = tf.constant(0.0)
+        for n in tf.range(steps):
+            with tf.GradientTape() as tape:
+                # This needs gradients relative to `img`
+                # `GradientTape` only watches `tf.Variable`s by default
+                tape.watch(img)
+                loss = hf.calc_loss(img, self.model)
+
+            # Calculate the gradient of the loss with respect to the pixels of the input image.
+            gradients = tape.gradient(loss, img)
+
+            # Normalize the gradients.
+            gradients /= tf.math.reduce_std(gradients) + 1e-8
+
+            # In gradient ascent, the "loss" is maximized so that the input image increasingly "excites" the layers.
+            # You can update the image by directly adding the gradients (because they're the same shape!)
+            img = img + gradients*step_size
+            img = tf.clip_by_value(img, -1, 1)
+
+        return loss, img
 
 
-"""# read files """
+def create_dataset():
+    filepath = "/home/wpx1/deepdream/data/tiny-imagenet-200"
+    data_dir = pathlib.Path(filepath).with_suffix('')
 
-def read_image_from_colab_storage(image, folder, route="train"):
-    ''' read an image from /root/.keras/datasets/tiny-imagenet-200 '''
+    batch_size = 32
+    img_height = 64
+    img_width = 64
 
-    if (route == "train" or
-        route == "test" or
-        route == "val"):
-        pass
-    else:
-        print("Please input route=\"train\" or \"test\" or \"val\" ")
+    train_data_dir = str(data_dir) + "/train"
 
-    test_image_path = tf.keras.utils.get_file(image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
-    print(f"Look here for the file: {test_image_path}")
-
-    img = PIL.Image.open(test_image_path)
-    final_img = np.array(img)
-
-    return final_img
+    train_ds = tf.keras.utils.image_dataset_from_directory(
+        train_data_dir,
+        seed=123,
+        image_size=(img_height, img_width),
+        batch_size=batch_size)
+    return train_ds
 
 
-def make_filename(filename, number=0, extension="JPEG"):
-    ''' append number and file extension to a filename '''
-
-    result = f"{filename}_{number}.{extension}"
-    return result
-
-
-
-
-"""# Define functions to select random layers"""
-
-
-def find_all_combinations(start=0, end=0):
-    ''' generate a list of all possible combinations 
-        between start and end (inclusive) '''
-
-    array = range(start, end + 1)
-    result = []
-
-    for i in range(start, end + 1):
-        for subset in itertools.combinations(array, i):
-            result.append(subset)
-    return result
-
-
-def pick_random_choices(arr, quantity, seed=None):
+def pick_random_choices(quantity, start=0, end=0, seed=None):
     ''' pick a quantity of random items in an array.
         (optional random seed) '''
+
+    num_list = range(start, end + 1)
+    arr = []
+
+    for i in range(start, end + 1):
+        for subset in itertools.combinations(num_list, i):
+            arr.append(subset)
 
     if seed:
         random.seed(seed)
@@ -86,10 +96,8 @@ def add_prefix(input_tuple):
     return array
 
 
-# Normalize an image
-
-
 def deprocess(img):
+    # Normalize an image
     img = 255*(img + 1.0)/2.0
     return tf.cast(img, tf.uint8)
 
@@ -114,10 +122,6 @@ def calc_loss(img, model):
     return tf.reduce_sum(losses)
 
 
-
-# Main Loop
-
-
 def run_deep_dream_simple(img, steps=100, step_size=0.01):
     # Convert from uint8 to the range expected by the model.
     img = tf.keras.applications.inception_v3.preprocess_input(img)
@@ -133,20 +137,17 @@ def run_deep_dream_simple(img, steps=100, step_size=0.01):
         steps_remaining -= run_steps
         step += run_steps
 
-        loss, img = deepdream(img, run_steps, tf.constant(step_size))
+        loss, img = DeepDream(img, run_steps, tf.constant(step_size))
 
         # display.clear_output(wait=True)
         # show(deprocess(img))
-        #print ("Step {}, loss {}".format(step, loss))
+        # print("Step {}, loss {}".format(step, loss))
 
     result = deprocess(img)
     # display.clear_output(wait=True)
     show(result)
 
     return result
-
-
-
 
 
 def create_layer_activated_model(base_model, layers):
@@ -156,13 +157,37 @@ def create_layer_activated_model(base_model, layers):
     return dream_model
 
 
-
-
-
-
-
-### Archive / Trash
+''' Archive / Trash
 
 # def unzip():
 #     dataset_url = "file:///content/drive/MyDrive/IMICS Research Lab/data/tiny-imagenet-200.zip"
 #     archive = tf.keras.utils.get_file(origin=dataset_url, extract=True, archive_format='zip')
+
+
+# def read_image_from_colab_storage(image, folder, route="train"):
+#     "read an image from /root/.keras/datasets/tiny-imagenet-200"
+
+#     if (route == "train" or
+#         route == "test" or
+#             route == "val"):
+#         pass
+#     else:
+#         print("Please input route=\"train\" or \"test\" or \"val\" ")
+
+#     test_image_path = tf.keras.utils.get_file(
+#         image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
+#     print(f"Look here for the file: {test_image_path}")
+
+#     img = PIL.Image.open(test_image_path)
+#     final_img = np.array(img)
+
+#     return final_img
+
+
+# def make_filename(filename, number=0, extension="JPEG"):
+#     "append number and file extension to a filename"
+
+#     result = f"{filename}_{number}.{extension}"
+#     return result
+
+'''
