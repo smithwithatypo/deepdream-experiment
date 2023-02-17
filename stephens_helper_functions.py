@@ -31,7 +31,7 @@ class DeepDream(tf.Module):
                 # This needs gradients relative to `img`
                 # `GradientTape` only watches `tf.Variable`s by default
                 tape.watch(img)
-                loss = hf.calc_loss(img, self.model)
+                loss = calc_loss(img, self.model)
 
             # Calculate the gradient of the loss with respect to the pixels of the input image.
             gradients = tape.gradient(loss, img)

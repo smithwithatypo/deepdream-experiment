@@ -37,35 +37,31 @@ random_layer_combinations = hf.pick_random_choices(
 random_layer_combinations_with_prefix = hf.add_prefix(
     random_layer_combinations)
 
-"""## Q: How long does it take to run 1 model on 5 different images?
-## A: 29 seconds
-"""
 
-# activation_layers = random_layer_combinations_with_prefix[0]
+activation_layers = random_layer_combinations_with_prefix[0]
 
-# print(f"Activation layers: {activation_layers}")
-# layers = [base_model.get_layer(name).output for name in activation_layers]
-# dream_model = hf.create_layer_activated_model(
-#     base_model=base_model, layers=layers)
-# deepdream = hf.DeepDream(dream_model)
+print(f"Activation layers: {activation_layers}")
+layers = [base_model.get_layer(name).output for name in activation_layers]
+dream_model = hf.create_layer_activated_model(
+    base_model=base_model, layers=layers)
+deepdream = hf.DeepDream(dream_model)
 
 
 ''' TESTING'''
 train_ds = hf.create_dataset()
-class_names = train_ds.class_names
 
-
+# this works. Now make a custom augmentation
 normalization_layer = tf.keras.layers.Rescaling(1./255)
 normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
 image_batch, labels_batch = next(iter(normalized_ds))
 first_image = image_batch[0]
-# Notice the pixel values are now in `[0,1]`.
+# (tutorial comment): Notice the pixel values are now in `[0,1]`.
 print(np.min(first_image), np.max(first_image))
 
-# augmented_image = hf.run_deep_dream_simple(img=test_image, steps=10,
-#    step_size=0.01)  # prints augmented image
+augmented_image = hf.run_deep_dream_simple(img=first_image, steps=10,
+                                           step_size=0.01)  # prints augmented image
 
-# print(augmented_image)
+print(augmented_image)
 # hf.show(augmented_image)
 # tf.keras.utils.save_img("./data/modified1/test.jpg", augmented_image)
 
