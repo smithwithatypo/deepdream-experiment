@@ -61,7 +61,7 @@ print(np.min(first_image), np.max(first_image))
 augmented_image = hf.run_deep_dream_simple(img=first_image, steps=10,
                                            step_size=0.01)  # prints augmented image
 
-print(augmented_image)
+# print(augmented_image)
 # hf.show(augmented_image)
 # tf.keras.utils.save_img("./data/modified1/test.jpg", augmented_image)
 
