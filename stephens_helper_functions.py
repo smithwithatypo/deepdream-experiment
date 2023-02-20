@@ -16,7 +16,7 @@ import random
 """# read files """
 
 
-def read_image_from_colab_storage(image, folder, route="train"):
+def read_image_from_local_storage(image, folder, route="train"):
     ''' read an image from /root/.keras/datasets/tiny-imagenet-200 '''
 
     if (route == "train" or
@@ -34,6 +34,15 @@ def read_image_from_colab_storage(image, folder, route="train"):
     final_img = np.array(img)
 
     return final_img
+
+
+def export_image_to_local_storage(image, number, folder):
+    ''' export an image to ./augmented_small_data/ '''
+
+    new_file = make_filename(folder, number, extension="JPEG")
+    tf.keras.utils.save_img(f"./augmented_small_data/{new_file}", image)
+
+    print(f"Saved to ./augmented_small_data/{new_file}")
 
 
 def make_filename(filename, number=0, extension="JPEG"):

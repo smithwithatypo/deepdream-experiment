@@ -41,7 +41,7 @@ class DeepDream(tf.Module):
                 # This needs gradients relative to `img`
                 # `GradientTape` only watches `tf.Variable`s by default
                 tape.watch(img)
-                loss = calc_loss(img, self.model)
+                loss = hf.calc_loss(img, self.model)
 
             # Calculate the gradient of the loss with respect to the pixels of the input image.
             gradients = tape.gradient(loss, img)
@@ -65,8 +65,7 @@ id = "n01443537"
 number = 103              # try 0, 10, 100, 102, 103
 
 input_file = hf.make_filename(id, number, extension="JPEG")
-test_img = hf.read_image_from_colab_storage(input_file, folder=id)
-show(test_img)
+test_img = hf.read_image_from_local_storage(input_file, folder=id)
 
 original_img = test_img
 
@@ -99,7 +98,7 @@ numbers = [0, 10, 100, 102, 103]
 
 for number in numbers:
     input_file = hf.make_filename(id, number, extension="JPEG")
-    original_img = hf.read_image_from_colab_storage(input_file, folder=id)
+    original_img = hf.read_image_from_local_storage(input_file, folder=id)
 
     print(f"Original Image:")
     hf.show(original_img)
