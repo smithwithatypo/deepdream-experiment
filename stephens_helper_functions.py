@@ -13,14 +13,18 @@ import itertools
 import random
 
 
-"""# read files """
+def make_filename(class_name, id=0, extension="JPEG"):
+    ''' append number and file extension to a filename '''
+
+    result = f"{class_name}_{id}.{extension}"
+    return result
 
 
 def read_image_from_local_storage(image, folder, route="train"):
-    ''' read an image from /root/.keras/datasets/tiny-imagenet-200 '''
+    ''' read an image from file:///home/wpx1/deepdream/data/tiny-imagenet-200/ '''
 
     if (route == "train" or
-        route == "test" or
+            route == "test" or
             route == "val"):
         pass
     else:
@@ -28,7 +32,7 @@ def read_image_from_local_storage(image, folder, route="train"):
 
     test_image_path = tf.keras.utils.get_file(
         image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
-    print(f"Look here for the file: {test_image_path}")
+    # print(f"Look here for the file: {test_image_path}")  # for debugging
 
     img = PIL.Image.open(test_image_path)
     final_img = np.array(img)
@@ -37,22 +41,12 @@ def read_image_from_local_storage(image, folder, route="train"):
 
 
 def export_image_to_local_storage(image, number, folder):
-    ''' export an image to ./augmented_small_data/ '''
+    ''' export an image to ./augmented_small_data/ '''  # TODO: abstract this
 
     new_file = make_filename(folder, number, extension="JPEG")
     tf.keras.utils.save_img(f"./augmented_small_data/{new_file}", image)
 
     print(f"Saved to ./augmented_small_data/{new_file}")
-
-
-def make_filename(filename, number=0, extension="JPEG"):
-    ''' append number and file extension to a filename '''
-
-    result = f"{filename}_{number}.{extension}"
-    return result
-
-
-"""# Define functions to select random layers"""
 
 
 def find_all_combinations(start=0, end=0):
@@ -92,9 +86,6 @@ def add_prefix(input_tuple):
     return array
 
 
-# Normalize an image
-
-
 def deprocess(img):
     img = 255*(img + 1.0)/2.0
     return tf.cast(img, tf.uint8)
@@ -105,8 +96,8 @@ def show(img):
 
 
 def calc_loss(img, model):
-    # Pass forward the image through the model to retrieve the activations.
-    # Converts the image into a batch of size 1.
+    ''' Pass forward the image through the model to retrieve the activations.
+        Converts the image into a batch of size 1. '''
     img_batch = tf.expand_dims(img, axis=0)
     layer_activations = model(img_batch)
     if len(layer_activations) == 1:
@@ -118,9 +109,6 @@ def calc_loss(img, model):
         losses.append(loss)
 
     return tf.reduce_sum(losses)
-
-
-# Main Loop
 
 
 def run_deep_dream_simple(img, steps=100, step_size=0.01):
@@ -159,7 +147,3 @@ def create_layer_activated_model(base_model, layers):
 
 
 ### Archive / Trash
-
-# def unzip():
-#     dataset_url = "file:///content/drive/MyDrive/IMICS Research Lab/data/tiny-imagenet-200.zip"
-#     archive = tf.keras.utils.get_file(origin=dataset_url, extract=True, archive_format='zip')
