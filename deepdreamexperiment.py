@@ -57,6 +57,34 @@ class DeepDream(tf.Module):
         return loss, img
 
 
+def run_deep_dream_simple(img, steps=100, step_size=0.01):
+    # Convert from uint8 to the range expected by the model.
+    img = tf.keras.applications.inception_v3.preprocess_input(img)
+    img = tf.convert_to_tensor(img)
+    step_size = tf.convert_to_tensor(step_size)
+    steps_remaining = steps
+    step = 0
+    while steps_remaining:
+        if steps_remaining > 100:
+            run_steps = tf.constant(100)
+        else:
+            run_steps = tf.constant(steps_remaining)
+        steps_remaining -= run_steps
+        step += run_steps
+
+        loss, img = deepdream(img, run_steps, tf.constant(step_size))
+
+        # display.clear_output(wait=True)
+        # show(deprocess(img))
+        #print ("Step {}, loss {}".format(step, loss))
+
+    result = hf.deprocess(img)
+    # display.clear_output(wait=True)
+    hf.show(result)
+
+    return result
+
+
 """# Testing
 
 """  # Executing code"""
@@ -97,14 +125,18 @@ id = "n01443537"
 numbers = [0, 10, 100, 102, 103]
 
 for number in numbers:
-    input_file = hf.make_filename(id, number, extension="JPEG")
-    original_img = hf.read_image_from_local_storage(input_file, folder=id)
+    input_file = hf.make_filename(
+        id, number, extension="JPEG")  # comment this out
+    original_img = hf.read_image_from_local_storage(
+        input_file, folder=id)  # comment this out
+    # TODO: input file/folder for-loop here from test.py.
 
     print(f"Original Image:")
     hf.show(original_img)
 
-    hf.run_deep_dream_simple(img=original_img, steps=100,
-                             step_size=0.01)  # prints augmented image
-
+    augmented_image = run_deep_dream_simple(img=original_img, steps=10,
+                                            step_size=0.01)  # prints augmented image
+    print(type(augmented_image))
+    hf.show(augmented_image)
 
 ##### Archive / Trash

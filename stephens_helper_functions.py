@@ -13,6 +13,24 @@ import itertools
 import random
 
 
+def make_list_of_directories_from_filepath(filepath):
+    ''' make a list of directories from a filepath'''
+
+    directories = [d for d in os.listdir(
+        filepath) if os.path.isdir(os.path.join(filepath, d))]
+
+    return directories
+
+
+def make_list_of_files_from_filepath(filepath):
+    ''' make a list of files from a filepath'''
+
+    files = [f for f in os.listdir(filepath) if os.path.isfile(
+        os.path.join(filepath, f))]
+
+    return files
+
+
 def make_filename(class_name, id=0, extension="JPEG"):
     ''' append number and file extension to a filename '''
 
@@ -20,7 +38,7 @@ def make_filename(class_name, id=0, extension="JPEG"):
     return result
 
 
-def read_image_from_local_storage(image, folder, route="train"):
+def read_image_from_local_storage(image, folder, route="train", small_data=False):
     ''' read an image from file:///home/wpx1/deepdream/data/tiny-imagenet-200/ '''
 
     if (route == "train" or
@@ -30,9 +48,13 @@ def read_image_from_local_storage(image, folder, route="train"):
     else:
         print("Please input route=\"train\" or \"test\" or \"val\" ")
 
-    test_image_path = tf.keras.utils.get_file(
-        image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
-    # print(f"Look here for the file: {test_image_path}")  # for debugging
+    if small_data:
+        test_image_path = tf.keras.utils.get_file(
+            image, f"file:///home/wpx1/deepdream/small_data/tiny-imagenet-200/{route}/{folder}/images/{image}")
+    else:
+        test_image_path = tf.keras.utils.get_file(
+            image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
+        # print(f"Look here for the file: {test_image_path}")  # for debugging
 
     img = PIL.Image.open(test_image_path)
     final_img = np.array(img)
@@ -111,32 +133,66 @@ def calc_loss(img, model):
     return tf.reduce_sum(losses)
 
 
-def run_deep_dream_simple(img, steps=100, step_size=0.01):
-    # Convert from uint8 to the range expected by the model.
-    img = tf.keras.applications.inception_v3.preprocess_input(img)
-    img = tf.convert_to_tensor(img)
-    step_size = tf.convert_to_tensor(step_size)
-    steps_remaining = steps
-    step = 0
-    while steps_remaining:
-        if steps_remaining > 100:
-            run_steps = tf.constant(100)
-        else:
-            run_steps = tf.constant(steps_remaining)
-        steps_remaining -= run_steps
-        step += run_steps
+# class DeepDream(tf.Module):
+#     def __init__(self, model):
+#         self.model = model
 
-        loss, img = deepdream(img, run_steps, tf.constant(step_size))
+#     @tf.function(
+#         input_signature=(
+#             tf.TensorSpec(shape=[None, None, 3], dtype=tf.float32),
+#             tf.TensorSpec(shape=[], dtype=tf.int32),
+#             tf.TensorSpec(shape=[], dtype=tf.float32),)
+#     )
+#     def __call__(self, img, steps, step_size):
+#         print("Tracing")
+#         loss = tf.constant(0.0)
+#         for n in tf.range(steps):
+#             with tf.GradientTape() as tape:
+#                 # This needs gradients relative to `img`
+#                 # `GradientTape` only watches `tf.Variable`s by default
+#                 tape.watch(img)
+#                 loss = hf.calc_loss(img, self.model)
 
-        # display.clear_output(wait=True)
-        # show(deprocess(img))
-        #print ("Step {}, loss {}".format(step, loss))
+#             # Calculate the gradient of the loss with respect to the pixels of the input image.
+#             gradients = tape.gradient(loss, img)
 
-    result = deprocess(img)
-    # display.clear_output(wait=True)
-    show(result)
+#             # Normalize the gradients.
+#             gradients /= tf.math.reduce_std(gradients) + 1e-8
 
-    return result
+#             # In gradient ascent, the "loss" is maximized so that the input image increasingly "excites" the layers.
+#             # You can update the image by directly adding the gradients (because they're the same shape!)
+#             img = img + gradients*step_size
+#             img = tf.clip_by_value(img, -1, 1)
+
+#         return loss, img
+
+
+# def run_deep_dream_simple(img, steps=100, step_size=0.01, deepdream=None):
+#     # Convert from uint8 to the range expected by the model.
+#     img = tf.keras.applications.inception_v3.preprocess_input(img)
+#     img = tf.convert_to_tensor(img)
+#     step_size = tf.convert_to_tensor(step_size)
+#     steps_remaining = steps
+#     step = 0
+#     while steps_remaining:
+#         if steps_remaining > 100:
+#             run_steps = tf.constant(100)
+#         else:
+#             run_steps = tf.constant(steps_remaining)
+#         steps_remaining -= run_steps
+#         step += run_steps
+
+#         loss, img = deepdream(img, run_steps, tf.constant(step_size))
+
+#         # display.clear_output(wait=True)
+#         # show(deprocess(img))
+#         #print ("Step {}, loss {}".format(step, loss))
+
+#     result = deprocess(img)
+#     # display.clear_output(wait=True)
+#     show(result)
+
+#     return result
 
 
 def create_layer_activated_model(base_model, layers):

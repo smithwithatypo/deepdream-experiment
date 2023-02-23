@@ -36,20 +36,32 @@ import random
 Plan
 - make list of all classes and numbers (crawl the filepath)
 - set variables for id and number  (this is where the for-loop will go)
-- read image from local storage
-- test augment one image
-- export image to local storage
+- read one image from local storage
+- augment one image
+- export one image to local storage
+- repeat loop
 
 '''
 
-class_list = ["n01443537"]  # TODO: list comprehension through the filepath
-id_list = [0]  # TODO: list comprehension through the filepath
+test = "n01443537"
+filepath = f"./small_data/tiny-imagenet-200/train/{test}/images/"
+files = hf.make_list_of_files_from_filepath(filepath)
+files.sort()
+# print(type(files))
+# print(files)
 
-for class_name in class_list:
-    for id in id_list:
-        input_file = hf.make_filename(class_name, id, extension="JPEG")
+
+filepath = f"./small_data/tiny-imagenet-200/train/"
+directories = hf.make_list_of_directories_from_filepath(filepath)
+directories.sort()
+# print(type(directories))
+# print(directories)
+
+# TODO: now augment an image!
+for folder in directories:
+    for file in files:
         original_img = hf.read_image_from_local_storage(
-            input_file, folder=class_name)
+            file, folder=folder, small_data=True)
         print(f"Original Image:")
         hf.show(original_img)
 
@@ -57,4 +69,6 @@ for class_name in class_list:
         print(f"New Image:")
         hf.show(new_image)
 
-        hf.export_image_to_local_storage(new_image, id, folder=class_name)
+        break  # to do only one image for testing
+        # hf.export_image_to_local_storage(new_image, file, folder=folder)  # uncomment to export
+    break  # to only do once for testing
