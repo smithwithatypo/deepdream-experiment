@@ -14,11 +14,6 @@ import random
 import time
 
 
-# make a list of all folders in small_data_original/
-# make a list of all files in each {folder}/images/
-# augment one file by running tutorial code
-# export augmented_image to data/small_data_augmented/{folder}/{file}
-
 start_time = time.time()
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -33,13 +28,13 @@ if gpus:
         print(e)
 
 
-filepath = f"./data/small_data_original/"
+filepath = f"./data/tiny-imagenet-200/train/"
 directories = hf.make_list_of_directories_from_filepath(filepath)
 
 base_model = tf.keras.applications.InceptionV3(
     include_top=False, weights='imagenet')
 
-names = ['mixed3', 'mixed5']
+names = ['mixed3', 'mixed5']  # get from augmented/metadata.txt
 layers = [base_model.get_layer(name).output for name in names]
 
 dream_model = tf.keras.Model(inputs=base_model.input, outputs=layers)
@@ -139,17 +134,18 @@ def run_deep_dream_simple(img, steps=100, step_size=0.01):
 
 
 black_white_images = set()
+count = 0
 
 for folder in directories:
-    filepath = f"./data/small_data_original/{folder}/images/"
+    filepath = f"./data/tiny-imagenet-200/train/{folder}/images/"
     files = hf.make_list_of_files_from_filepath(filepath)
     for file in files:
-        if os.path.exists(f"./data/small_data_augmented/{folder}/images/{file}"):
+        if os.path.exists(f"./data/tiny-imagenet-200/augmented1/{folder}/images/{file}"):
             print("Already augmented")
             continue
 
         original_img = hf.read_image_from_local_storage(
-            file, folder=folder, route=None, small_data=True)
+            file, folder=folder, route=None)
         print(f"Original Image:", type(original_img), original_img.shape)
 
         if original_img.shape == (64, 64):
@@ -162,12 +158,14 @@ for folder in directories:
 
         print(f"Dream Image:", type(dream_img), dream_img.shape)
         hf.show(dream_img)
-        break  # debugging before export
+        # break  # debugging before export
 
         hf.export_image_to_local_storage(
             dream_img, folder=folder, file=file)
         # break  # comment out to run on all files
-
+    # count += 1
+    # if count >= 2:
+    #     break  # runs on only 2 folders
     # break  # comment out to run on all folders
 
 print(

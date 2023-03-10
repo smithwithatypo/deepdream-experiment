@@ -38,7 +38,7 @@ def make_filename(class_name, id=0, extension="JPEG"):
     return result
 
 
-def read_image_from_local_storage(image, folder, route="train", small_data=False):
+def read_image_from_local_storage(image, folder, route="train"):
     ''' read an image from file:///home/wpx1/deepdream/data/tiny-imagenet-200/ '''
 
     if (route == "train" or
@@ -49,17 +49,17 @@ def read_image_from_local_storage(image, folder, route="train", small_data=False
     else:
         print("Please input route=\"train\" or \"test\" or \"val\" ")
 
-    if small_data:
-        test_image_path = tf.keras.utils.get_file(
-            image, f"file:///home/wpx1/deepdream_small/data/small_data_original/{folder}/images/{image}")
-    else:
-        # test_image_path = tf.keras.utils.get_file(
-        #     image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
-        # print(f"Look here for the file: {test_image_path}")  # for debugging
-        pass
+    # if small_data == True:
+    test_image_path = tf.keras.utils.get_file(
+        image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/train/{folder}/images/{image}")
+    # else:
+    #     # test_image_path = tf.keras.utils.get_file(
+    #     #     image, f"file:///home/wpx1/deepdream/data/tiny-imagenet-200/{route}/{folder}/images/{image}")
+    #     # print(f"Look here for the file: {test_image_path}")  # for debugging
+    #     pass
 
     print(
-        f"On this image: file:///home/wpx1/deepdream_small/data/small_data_original/{folder}/images/{image}")
+        f"On this image: file:///home/wpx1/deepdream/data/tiny-imagenet-200/train/{folder}/images/{image}")
     img = PIL.Image.open(test_image_path)
     final_img = np.array(img)
 
@@ -67,28 +67,28 @@ def read_image_from_local_storage(image, folder, route="train", small_data=False
 
 
 def export_image_to_local_storage(image, folder, file):
-    ''' export an image to .data/small_data_augmented/ '''  # TODO: abstract this
+    ''' export an image to .data/tiny-imagenet-200/augmented1/ '''  # TODO: abstract this
 
     # mkdir if it doesn't exist
-    if not os.path.exists(f"./data/small_data_augmented/{folder}/images/"):
+    if not os.path.exists(f"./data/tiny-imagenet-200/augmented1/{folder}/images/"):
         os.makedirs(
-            f"./data/small_data_augmented/{folder}/images/")
+            f"./data/tiny-imagenet-200/augmented1/{folder}/images/")
     else:
         pass
 
     # if the file already exists, pass
-    if os.path.exists(f"./data/small_data_augmented/{folder}/images/{file}"):
+    if os.path.exists(f"./data/tiny-imagenet-200/augmented1/{folder}/images/{file}"):
         print(
-            f"File already exists: ./data/small_data_augmented/{folder}/images/{file}")
+            f"File already exists: ./data/tiny-imagenet-200/augmented1/{folder}/images/{file}")
     else:
         tf.keras.utils.save_img(
-            f"./data/small_data_augmented/{folder}/images/{file}", image)
+            f"./data/tiny-imagenet-200/augmented1/{folder}/images/{file}", image)
 
         print(
-            f"Saved to ./data/small_data_augmented/{folder}/images/{file}")
+            f"Saved to ./data/tiny-imagenet-200/augmented1/{folder}/images/{file}")
 
 
-def find_all_combinations(start=0, end=0):
+def find_all_combinations(start=0, end=0, max_length=4):
     ''' generate a list of all possible combinations 
         between start and end (inclusive) '''
 
@@ -97,7 +97,8 @@ def find_all_combinations(start=0, end=0):
 
     for i in range(start, end + 1):
         for subset in itertools.combinations(array, i):
-            result.append(subset)
+            if len(subset) < max_length:
+                result.append(subset)
     return result
 
 

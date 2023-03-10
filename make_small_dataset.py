@@ -15,7 +15,7 @@ except OSError as error:
 files = os.listdir(source)
 
 # iterating over all the files in the source directory
-for fname in files[0:21]:
+for fname in files:
     # copying the files to the destination directory
     # print(os.path.join(source, fname), target)
     shutil.copy2(os.path.join(source, fname), target)
