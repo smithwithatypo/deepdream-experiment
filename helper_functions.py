@@ -66,26 +66,26 @@ def read_image_from_local_storage(image, folder, route="train"):
     return final_img
 
 
-def export_image_to_local_storage(image, folder, file):
-    ''' export an image to .data/tiny-imagenet-200/augmented1/ '''  # TODO: abstract this
+def export_image_to_local_storage(image, folder, file, batch):
+    ''' export an image to .data/tiny-imagenet-200/augmented/{batch}/ '''  # TODO: abstract this
 
     # mkdir if it doesn't exist
-    if not os.path.exists(f"./data/tiny-imagenet-200/augmented1/{folder}/images/"):
+    if not os.path.exists(f"./data/tiny-imagenet-200/augmented/{batch}/{folder}/images/"):
         os.makedirs(
-            f"./data/tiny-imagenet-200/augmented1/{folder}/images/")
+            f"./data/tiny-imagenet-200/augmented/{batch}/{folder}/images/")
     else:
         pass
 
     # if the file already exists, pass
-    if os.path.exists(f"./data/tiny-imagenet-200/augmented1/{folder}/images/{file}"):
+    if os.path.exists(f"./data/tiny-imagenet-200/augmented/{batch}/{folder}/images/{file}"):
         print(
-            f"File already exists: ./data/tiny-imagenet-200/augmented1/{folder}/images/{file}")
+            f"File already exists: ./data/tiny-imagenet-200/augmented/{batch}/{folder}/images/{file}")
     else:
         tf.keras.utils.save_img(
-            f"./data/tiny-imagenet-200/augmented1/{folder}/images/{file}", image)
+            f"./data/tiny-imagenet-200/augmented/{batch}/{folder}/images/{file}", image)
 
         print(
-            f"Saved to ./data/tiny-imagenet-200/augmented1/{folder}/images/{file}")
+            f"Saved to ./data/tiny-imagenet-200/augmented/{batch}/{folder}/images/{file}")
 
 
 def find_all_combinations(start=0, end=0, max_length=4):

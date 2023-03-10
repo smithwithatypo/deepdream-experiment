@@ -19,10 +19,10 @@ start_time = time.time()
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
     try:
-        # Restrict TensorFlow to only use the fifth GPU
-        tf.config.experimental.set_visible_devices(gpus[4], 'GPU')
+        # Restrict TensorFlow to only use one GPU
+        tf.config.experimental.set_visible_devices(gpus[0], 'GPU')
         # Allow TensorFlow to allocate only as much GPU memory as needed
-        tf.config.experimental.set_memory_growth(gpus[4], True)
+        tf.config.experimental.set_memory_growth(gpus[0], True)
     except RuntimeError as e:
         # Visible devices must be set before GPUs have been initialized
         print(e)
@@ -34,7 +34,8 @@ directories = hf.make_list_of_directories_from_filepath(filepath)
 base_model = tf.keras.applications.InceptionV3(
     include_top=False, weights='imagenet')
 
-names = ['mixed3', 'mixed5']  # get from augmented/metadata.txt
+augmented_batch = "augmented2"
+names = ['mixed3', 'mixed9', 'mixed10']  # get from augmented/metadata.txt
 layers = [base_model.get_layer(name).output for name in names]
 
 dream_model = tf.keras.Model(inputs=base_model.input, outputs=layers)
@@ -124,7 +125,7 @@ def run_deep_dream_simple(img, steps=100, step_size=0.01):
 
         display.clear_output(wait=True)
         show(deprocess(img))
-        print("Step {}, loss {}".format(step, loss))
+        # print("Step {}, loss {}".format(step, loss))
 
     result = deprocess(img)
     display.clear_output(wait=True)
@@ -140,28 +141,28 @@ for folder in directories:
     filepath = f"./data/tiny-imagenet-200/train/{folder}/images/"
     files = hf.make_list_of_files_from_filepath(filepath)
     for file in files:
-        if os.path.exists(f"./data/tiny-imagenet-200/augmented1/{folder}/images/{file}"):
-            print("Already augmented")
+        if os.path.exists(f"./data/tiny-imagenet-200/augmented/{augmented_batch}/{folder}/images/{file}"):
+            # print("Already augmented")
             continue
 
         original_img = hf.read_image_from_local_storage(
             file, folder=folder, route=None)
-        print(f"Original Image:", type(original_img), original_img.shape)
+        # print(f"Original Image:", type(original_img), original_img.shape)
 
         if original_img.shape == (64, 64):
-            print("Image is not RGB")
+            # print("Image is not RGB")
             black_white_images.add(file)
             continue
 
         dream_img = run_deep_dream_simple(img=original_img,
                                           steps=40, step_size=0.01)
 
-        print(f"Dream Image:", type(dream_img), dream_img.shape)
-        hf.show(dream_img)
+        # print(f"Dream Image:", type(dream_img), dream_img.shape)
+        # hf.show(dream_img)
         # break  # debugging before export
 
         hf.export_image_to_local_storage(
-            dream_img, folder=folder, file=file)
+            dream_img, folder=folder, file=file, batch=augmented_batch)
         # break  # comment out to run on all files
     # count += 1
     # if count >= 2:
