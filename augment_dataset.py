@@ -15,6 +15,8 @@ import time
 
 
 augmented_batch = "augmented2"   # get from augmented/metadata.txt
+names = ['mixed1', 'mixed3', 'mixed9']   # change activated layers here
+
 
 start_time = time.time()
 
@@ -22,9 +24,9 @@ gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
     try:
         # Restrict TensorFlow to only use one GPU
-        tf.config.experimental.set_visible_devices(gpus[6], 'GPU')
+        tf.config.experimental.set_visible_devices(gpus[4], 'GPU')
         # Allow TensorFlow to allocate only as much GPU memory as needed
-        tf.config.experimental.set_memory_growth(gpus[6], True)
+        tf.config.experimental.set_memory_growth(gpus[4], True)
     except RuntimeError as e:
         # Visible devices must be set before GPUs have been initialized
         print(e)
@@ -36,7 +38,6 @@ directories = hf.make_list_of_directories_from_filepath(filepath)
 base_model = tf.keras.applications.InceptionV3(
     include_top=False, weights='imagenet')
 
-names = ['mixed3', 'mixed9']
 layers = [base_model.get_layer(name).output for name in names]
 
 dream_model = tf.keras.Model(inputs=base_model.input, outputs=layers)
