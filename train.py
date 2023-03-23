@@ -17,8 +17,8 @@ batch_size = 32
 img_height = 64
 img_width = 64
 
-train_dataset_dir = "/home/wpx1/deepdream/data/tiny-imagenet-200/train/"
-val_dataset_dir = "/home/wpx1/deepdream/data/tiny-imagenet-200/val/"
+train_dataset_dir = "/home/wpx1/deepdream/data/tiny-imagenet-200/small_dataset/"
+# val_dataset_dir = "/home/wpx1/deepdream/data/tiny-imagenet-200/val/"
 
 train_ds = tf.keras.utils.image_dataset_from_directory(
     train_dataset_dir,
