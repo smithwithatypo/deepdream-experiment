@@ -19,14 +19,16 @@ names = ['mixed1', 'mixed3', 'mixed9']   # change activated layers here
 
 
 start_time = time.time()
+# tf.debugging.set_log_device_placement(True)  # shows if GPU or CPU is used
+
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
     try:
         # Restrict TensorFlow to only use one GPU
-        tf.config.experimental.set_visible_devices(gpus[4], 'GPU')
+        tf.config.set_visible_devices(gpus[5], 'GPU')
         # Allow TensorFlow to allocate only as much GPU memory as needed
-        tf.config.experimental.set_memory_growth(gpus[4], True)
+        tf.config.experimental.set_memory_growth(gpus[5], True)
     except RuntimeError as e:
         # Visible devices must be set before GPUs have been initialized
         print(e)
@@ -125,13 +127,13 @@ def run_deep_dream_simple(img, steps=100, step_size=0.01):
 
         loss, img = deepdream(img, run_steps, tf.constant(step_size))
 
-        display.clear_output(wait=True)
-        show(deprocess(img))
-        print("Step {}, loss {}".format(step, loss))
+        # display.clear_output(wait=True)
+        # show(deprocess(img))
+        # print("Step {}, loss {}".format(step, loss))
 
     result = deprocess(img)
-    display.clear_output(wait=True)
-    show(result)
+    # display.clear_output(wait=True)
+    # show(result)
 
     return result
 
@@ -149,7 +151,12 @@ for folder in directories:
 
         original_img = hf.read_image_from_local_storage(
             file, folder=folder, route=None)
-        print(f"Original Image:", type(original_img), original_img.shape)
+        # print(f"Original Image:", type(original_img), original_img.shape)
+
+        if original_img is None or original_img.ndim != 3 or original_img.shape[:2] != (64, 64):
+            print(
+                f"Image is not read correctly or has incorrect dimensions: {file}")
+            continue
 
         if original_img.shape == (64, 64):
             print("Image is not RGB")

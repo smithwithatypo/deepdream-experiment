@@ -34,7 +34,6 @@ val_ds = tf.keras.utils.image_dataset_from_directory(
     batch_size=batch_size)
 
 class_names = train_ds.class_names
-# print(class_names)
 
 AUTOTUNE = tf.data.AUTOTUNE
 
@@ -44,18 +43,18 @@ val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 num_classes = len(class_names)
 
-# data_augmentation = keras.Sequential([
-#     layers.RandomFlip("horizontal",
-#                       input_shape=(img_height,
-#                                    img_width,
-#                                    3)),
-#     layers.RandomRotation(0.1),
-#     layers.RandomZoom(0.1)
-# ]
-# )
+data_augmentation = keras.Sequential([
+    layers.RandomFlip("horizontal",
+                      input_shape=(img_height,
+                                   img_width,
+                                   3)),
+    layers.RandomRotation(0.1),
+    layers.RandomZoom(0.1)
+]
+)
 
 model = Sequential([
-    # data_augmentation,
+    data_augmentation,
     layers.Rescaling(1./255),
     layers.Conv2D(16, 3, padding='same', activation='relu'),
     layers.MaxPooling2D(),
@@ -75,7 +74,7 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 epochs = 10
-history = model.fit(
+model.fit(
     train_ds,
     validation_data=val_ds,
     epochs=epochs
