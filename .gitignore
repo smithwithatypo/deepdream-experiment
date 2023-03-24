@@ -1,7 +1,7 @@
-<<<<<<< HEAD
+
 data/
-=======
+augmented_small_data/
 *~
-tiny-imagenet-200
 __pycache__
->>>>>>> ef0e49fabbb97592b99f478cedc17a02d164a2d4
+small_data/
+*.log

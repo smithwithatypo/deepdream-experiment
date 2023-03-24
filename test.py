@@ -2,8 +2,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import stephens_helper_functions as hf
-import DeepDream
+import helper_functions as hf
 
 
 import IPython.display as display
@@ -17,18 +16,16 @@ import time
 
 time_start = time.time()
 
-# TEST: create a dataset
-train_ds = hf.create_dataset()
-class_names = train_ds.class_names
+all_combos = hf.find_all_combinations(start=0, end=10)
+# print(len(all_combos))
 
-test_dataset = train_ds.take(1)
-
-for images, labels in test_dataset:
-    test_image = images[0]
-    test_label = class_names[labels[0]]
-    break
-print(test_image)
-print(test_label)
+selected_combos = hf.pick_random_choices(all_combos, 9, seed=1)
+selected_combos.append(selected_combos[0])
+selected_combos[0] = (3, 5)
+selected_combos = hf.add_prefix(selected_combos)
 
 
-print(f"------ {round((time.time() - time_start), 2)} seconds ------")
+for index, combo in enumerate(selected_combos):
+    print(f"augmented{index+1} activated layers: {combo}")
+    print(f"augmented{index+1} steps: 40")
+    print("")
