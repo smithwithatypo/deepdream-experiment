@@ -5,3 +5,4 @@ augmented_small_data/
 __pycache__
 small_data/
 *.log
+*.out

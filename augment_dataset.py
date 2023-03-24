@@ -14,21 +14,27 @@ import random
 import time
 
 
-augmented_batch = "augmented2"   # get from augmented/metadata.txt
-names = ['mixed1', 'mixed3', 'mixed9']   # change activated layers here
+augmented_batch = "augmented10"   # get from augmented/metadata.txt
+names = ['mixed2', 'mixed3']   # change activated layers here
+activated_gpu = int(6)  # change activated GPU here
 
+
+'''
+Don't need to change anything below this line
+To run:  $ nohup python augment_dataset.py > augmented##.log &
+'''
 
 start_time = time.time()
 # tf.debugging.set_log_device_placement(True)  # shows if GPU or CPU is used
 
-
+# GPU config
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
     try:
         # Restrict TensorFlow to only use one GPU
-        tf.config.set_visible_devices(gpus[5], 'GPU')
+        tf.config.set_visible_devices(gpus[activated_gpu], 'GPU')
         # Allow TensorFlow to allocate only as much GPU memory as needed
-        tf.config.experimental.set_memory_growth(gpus[5], True)
+        tf.config.experimental.set_memory_growth(gpus[activated_gpu], True)
     except RuntimeError as e:
         # Visible devices must be set before GPUs have been initialized
         print(e)
@@ -48,8 +54,6 @@ dream_model = tf.keras.Model(inputs=base_model.input, outputs=layers)
 def deprocess(img):
     img = 255*(img + 1.0)/2.0
     return tf.cast(img, tf.uint8)
-
-# Display an image
 
 
 def show(img):
@@ -71,9 +75,10 @@ def calc_loss(img, model):
 
     return tf.reduce_sum(losses)
 
+# original tutorial code for single GPU
+
 
 class DeepDream(tf.Module):
-
     def __init__(self, model):
         self.model = model
 
@@ -127,13 +132,13 @@ def run_deep_dream_simple(img, steps=100, step_size=0.01):
 
         loss, img = deepdream(img, run_steps, tf.constant(step_size))
 
-        # display.clear_output(wait=True)
-        # show(deprocess(img))
-        # print("Step {}, loss {}".format(step, loss))
+        display.clear_output(wait=True)
+        show(deprocess(img))
+        print("Step {}, loss {}".format(step, loss))
 
     result = deprocess(img)
-    # display.clear_output(wait=True)
-    # show(result)
+    display.clear_output(wait=True)
+    show(result)
 
     return result
 
@@ -153,18 +158,13 @@ for folder in directories:
             file, folder=folder, route=None)
         # print(f"Original Image:", type(original_img), original_img.shape)
 
-        if original_img is None or original_img.ndim != 3 or original_img.shape[:2] != (64, 64):
-            print(
-                f"Image is not read correctly or has incorrect dimensions: {file}")
-            continue
-
         if original_img.shape == (64, 64):
             print("Image is not RGB")
             black_white_images.add(file)
             continue
 
         dream_img = run_deep_dream_simple(img=original_img,
-                                          steps=40, step_size=0.01)
+                                          steps=20, step_size=0.01)
 
         # print(f"Dream Image:", type(dream_img), dream_img.shape)
         hf.show(dream_img)
