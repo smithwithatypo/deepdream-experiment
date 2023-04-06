@@ -85,7 +85,7 @@ model.compile(optimizer='adam',
                   from_logits=True),
               metrics=['accuracy'])
 
-epochs = 20
+epochs = 15
 model.fit(
     train_ds,
     validation_data=val_ds,
