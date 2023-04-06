@@ -53,6 +53,18 @@ data_augmentation = keras.Sequential([
 ]
 )
 
+callbacks = [
+    keras.callbacks.EarlyStopping(
+        # Stop training when `val_loss` is no longer improving
+        monitor="val_loss",
+        # "no longer improving" being defined as "no better than 1e-2 less"
+        min_delta=1e-2,
+        # "no longer improving" being further defined as "for at least 2 epochs"
+        patience=2,
+        verbose=1,
+    )
+]
+
 model = Sequential([
     data_augmentation,
     layers.Rescaling(1./255),
@@ -73,11 +85,12 @@ model.compile(optimizer='adam',
                   from_logits=True),
               metrics=['accuracy'])
 
-epochs = 10
+epochs = 20
 model.fit(
     train_ds,
     validation_data=val_ds,
-    epochs=epochs
+    epochs=epochs,
+    callbacks=callbacks
 )
 
 
