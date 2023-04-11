@@ -15,20 +15,16 @@ batch_size = 32
 img_height = 64
 img_width = 64
 
-train_dataset_dir = "/home/wpx1/deepdream/data/tiny-imagenet-200/small_dataset/"
-# val_dataset_dir = "/home/wpx1/deepdream/data/tiny-imagenet-200/val/"
+train_dataset_dir = "/home/wpx1/deepdream/data/tiny-imagenet-200/train/"
+val_dataset_dir = "/home/wpx1/deepdream/data/tiny-imagenet-200/val/images/"
 
 train_ds = tf.keras.utils.image_dataset_from_directory(
     train_dataset_dir,
-    validation_split=0.2,
-    subset="training",
     seed=1,
     image_size=(img_height, img_width),
     batch_size=batch_size)
 val_ds = tf.keras.utils.image_dataset_from_directory(
-    train_dataset_dir,
-    validation_split=0.2,
-    subset="validation",
+    val_dataset_dir,
     seed=1,
     image_size=(img_height, img_width),
     batch_size=batch_size)
@@ -43,15 +39,16 @@ val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 num_classes = len(class_names)
 
-data_augmentation = keras.Sequential([
-    layers.RandomFlip("horizontal",
-                      input_shape=(img_height,
-                                   img_width,
-                                   3)),
-    layers.RandomRotation(0.1),
-    layers.RandomZoom(0.1)
-]
-)
+
+# data_augmentation = keras.Sequential([
+#     layers.RandomFlip("horizontal",
+#                       input_shape=(img_height,
+#                                    img_width,
+#                                    3)),
+#     layers.RandomRotation(0.1),
+#     layers.RandomZoom(0.1)
+# ]
+# )
 
 callbacks = [
     keras.callbacks.EarlyStopping(
@@ -66,7 +63,7 @@ callbacks = [
 ]
 
 model = Sequential([
-    data_augmentation,
+    # data_augmentation,    # uncomment to use data augmentation
     layers.Rescaling(1./255),
     layers.Conv2D(16, 3, padding='same', activation='relu'),
     layers.MaxPooling2D(),
