@@ -140,6 +140,7 @@ model.compile(optimizer='adam',
                   from_logits=False),
               metrics=['accuracy'])
 
+
 epochs = 15
 model.fit(
     train_ds,
